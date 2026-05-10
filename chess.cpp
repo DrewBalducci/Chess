@@ -8,8 +8,21 @@
  * * * * * * * * * * * * * * * * * * * */
 
 
-int main()
-{
+// ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** //
+//                           Chess                             //
+// ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** //
 
-	return 0;
+#include "chess.h"
+#include "chessboard.h"
+
+Chess::Chess(){
+    board = Chessboard();
 }
+
+void Chess::reset_board(){
+
+
+}
+
+bool Chess::make_move()
+
