@@ -8,11 +8,11 @@
 
 #include "chessboard.h"
 
-Chessboard(){
+Chessboard::Chessboard(){
     reset_board();
 }
 void Chessboard::reset_board(){
-    for (int ii=0; i<8; i++){
+    for (uint8_t ii=0; ii<8; ii++){
         set_square( {1,ii}, {WHITE,PAWN} );
         set_square( {7,ii}, {BLACK,PAWN} );
     }
@@ -41,16 +41,16 @@ void Chessboard::reset_board(){
 uint64_t Chessboard::valid_moves(Square square){
     Piece piece = get_piece(square);
     switch (piece.type){
-        case PAWN:
-            return pawn_moves(square, piece.color);
-        case PAWN:
-            return pawn_moves(square, piece.color);
-        case PAWN:
-            return pawn_moves(square, piece.color);
-        case PAWN:
-            return pawn_moves(square, piece.color);
-        case PAWN:
-            return pawn_moves(square, piece.color);
+        case KING:
+            return king_moves(square, piece.color);
+        case QUEEN:
+            return queen_moves(square, piece.color);
+        case ROOK:
+            return rook_moves(square, piece.color);
+        case BISHOP:
+            return bishop_moves(square, piece.color);
+        case KNIGHT:
+            return knight_moves(square, piece.color);
         case PAWN:
             return pawn_moves(square, piece.color);
         default:
@@ -58,16 +58,16 @@ uint64_t Chessboard::valid_moves(Square square){
     }
 }
 
-uint16_t Chessboard::get_piece(Piece piece){
+uint16_t Chessboard::get_piece_id(Piece piece){
     uint16_t pieceVal = piece.type;
-    pieceval += piece.color << 8;
+    pieceVal += piece.color << 8;
     return pieceVal; // Lower byte is the piece 0-5 and top byte is color 0-1
 }
 
 
-bool Chessboard::move_piece(Square from, to){
+bool Chessboard::move_piece(Square from, Square to){
     uint64_t squareInt = (1 << from.col) << (8 * from.row);
-    if (squareInt & valid_moves){
+    if (squareInt & valid_moves(from)){
         Piece piece = get_piece(from);
         set_square(to, piece);
         clr_square(from);
@@ -76,11 +76,11 @@ bool Chessboard::move_piece(Square from, to){
         return false;
     }
 }
-void Chessboard::set_piece(Square square, Piece piece){
+void Chessboard::set_square(Square square, Piece piece){
     board[square.row][square.col] = piece;
 }
-void Chessboard::clr_piece(Square square){
-    set_piece(square, {});
+void Chessboard::clr_square(Square square){
+    set_square(square, {});
 }
 Piece Chessboard::get_piece(Square square){
     return board[square.row][square.col];
@@ -97,19 +97,30 @@ uint64_t Chessboard::king_moves(Square square, Color color){
             if (rowOffset == 0 && colOffset == 0) continue;
             if (col < 0 || col > 7) continue;
             piece = get_piece({row, col});
-            if (piece == {} || piece.color != color){
+            if (piece.type == EMPTY || piece.color != color){
                 validMoves += (1 << col) << (8 * row);
             }
         }
     }
+    return validMoves;
 }
 uint64_t Chessboard::queen_moves(Square square, Color color){
+    uint64_t validMoves = 0;
+    return validMoves;
 }
 uint64_t Chessboard::rook_moves(Square square, Color color){
+    uint64_t validMoves = 0;
+    return validMoves;
 }
 uint64_t Chessboard::bishop_moves(Square square, Color color){
+    uint64_t validMoves = 0;
+    return validMoves;
 }
 uint64_t Chessboard::knight_moves(Square square, Color color){
+    uint64_t validMoves = 0;
+    return validMoves;
 }
 uint64_t Chessboard::pawn_moves(Square square, Color color){
+    uint64_t validMoves = 0;
+    return validMoves;
 }

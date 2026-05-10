@@ -20,9 +20,10 @@ Chess::Chess(){
 }
 
 void Chess::reset_board(){
-
-
+    return;
 }
 
-bool Chess::make_move()
+bool Chess::make_move(){
+    return false;
+}
 

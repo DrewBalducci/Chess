@@ -7,6 +7,10 @@
  *
  * * * * * * * * * * * * * * * * * * * */
 
+
+#include "chessboard.h"
+#include <stdint.h>
+
 #define ROW_1   0xFF
 #define ROW_2   ROW_1 << 8
 #define ROW_3   ROW_2 << 8
@@ -35,7 +39,7 @@ public:
     bool make_move();
 
 private:
-    Board board;
+    Chessboard board;
     void reset_board();
 
 };
