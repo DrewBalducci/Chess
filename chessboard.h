@@ -31,12 +31,15 @@ class Chessboard
 
     private:
         Piece board[8][8];
-        uint8_t whosTurn = WHITE;
+        Color whosTurn = WHITE;
 
         bool move_piece(Square from, Square to);
         void set_square(Square square, Piece piece);
         void clr_square(Square square);
         Piece get_piece(Square square);
+        bool move_here(Square square, Color color);
+        bool take_here(Square square, Color color);
+        bool move_check(Square square, Color color, uint64_t &validMoves);
         uint64_t king_moves(Square square, Color color);
         uint64_t queen_moves(Square square, Color color);
         uint64_t rook_moves(Square square, Color color);

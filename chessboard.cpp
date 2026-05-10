@@ -66,11 +66,12 @@ uint16_t Chessboard::get_piece_id(Piece piece){
 
 
 bool Chessboard::move_piece(Square from, Square to){
-    uint64_t squareInt = (1 << from.col) << (8 * from.row);
+    uint64_t squareInt = 1 << (8*from.row + from.col);
     if (squareInt & valid_moves(from)){
         Piece piece = get_piece(from);
         set_square(to, piece);
         clr_square(from);
+        whosTurn = whosTurn == WHITE ? BLACK : WHITE;
         return true;
     } else {
         return false;
@@ -83,12 +84,32 @@ void Chessboard::clr_square(Square square){
     set_square(square, {});
 }
 Piece Chessboard::get_piece(Square square){
+    if (square.row > 8 || square.col > 8)
+        return {};
     return board[square.row][square.col];
 }
+
+bool Chessboard::move_here(Square square, Color color){
+    Piece piece = get_piece(square);
+    return piece.type == EMPTY;
+}
+
+bool Chessboard::take_here(Square square, Color color){
+    Piece piece = get_piece(square);
+    Color enemyColor = color == WHITE ? BLACK : WHITE;
+    return piece.color == enemyColor;
+}
+
+bool Chessboard::move_check(Square square, Color color, uint64_t &validMoves){
+    bool can_move_here = move_here(square, color) || take_here(square, color);
+    if (can_move_here)
+        validMoves |= 1 << (8*square.row + square.col);
+    return can_move_here;
+}
+
 uint64_t Chessboard::king_moves(Square square, Color color){
     uint64_t validMoves = 0;
     int row, col;
-    Piece piece;
     for (int rowOffset=-1; rowOffset<=1; rowOffset++){
         row = square.row + rowOffset;
         if (row < 0 || row > 7) continue;     //Continue statement mainly to reduce nesting 
@@ -96,31 +117,94 @@ uint64_t Chessboard::king_moves(Square square, Color color){
             col = square.col + colOffset;
             if (rowOffset == 0 && colOffset == 0) continue;
             if (col < 0 || col > 7) continue;
-            piece = get_piece({row, col});
-            if (piece.type == EMPTY || piece.color != color){
-                validMoves += (1 << col) << (8 * row);
-            }
+            move_check({row, col}, color, validMoves);
         }
     }
     return validMoves;
 }
+
 uint64_t Chessboard::queen_moves(Square square, Color color){
     uint64_t validMoves = 0;
+    validMoves |= bishop_moves(square, color);
+    validMoves |= rook_moves(square, color);
     return validMoves;
 }
+
 uint64_t Chessboard::rook_moves(Square square, Color color){
     uint64_t validMoves = 0;
+    uint8_t ii;
+    for (ii = square.row+1; ii<8; ii++){    // Up
+        if (!move_check({ii, square.col}, color, validMoves)) break;
+    }
+    for (ii = square.row-1; ii>0; ii--){    // Down
+        if (!move_check({ii, square.col}, color, validMoves)) break;
+    }
+    
+    for (ii = square.col+1; ii<8; ii++){    // Right
+        if (!move_check({square.row, ii}, color, validMoves)) break;
+    }
+    for (ii = square.col-1; ii>0; ii--){    // Left
+        if (!move_check({square.row, ii}, color, validMoves)) break;
+    }
     return validMoves;
 }
+
 uint64_t Chessboard::bishop_moves(Square square, Color color){
     uint64_t validMoves = 0;
+    uint8_t row,col;
+    for (row=square.row+1, col=square.col+1; row<8 && col<8; row++, col++){    // NE
+        if (!move_check({row, col}, color, validMoves)) break;
+    }
+    for (row=square.row+1, col=square.col-1; row<8 && col>0; row++, col--){    // NW
+        if (!move_check({row, col}, color, validMoves)) break;
+    }
+    for (row=square.row-1, col=square.col-1; row>0 && col>0; row--, col--){    // SE
+        if (!move_check({row, col}, color, validMoves)) break;
+    }
+    for (row=square.row-1, col=square.col+1; row>0 && col<8; row--, col++){    // SW
+        if (!move_check({row, col}, color, validMoves)) break;
+    }
+    
     return validMoves;
 }
+
 uint64_t Chessboard::knight_moves(Square square, Color color){
     uint64_t validMoves = 0;
+    int rowOffset[8] = {2, 2,-2,-2, 1, 1,-1,-1};
+    int colOffset[8] = {1,-1, 1,-1, 2,-2, 2,-1};
+    int row, col;
+
+    for (int ii=0; ii<8; ii++){
+        row = square.row + rowOffset[ii];
+        col = square.col + colOffset[ii];
+        if (row>=0 && row<8 && col>=0 && col<8)
+            move_check({row,col}, color, validMoves);
+    }
     return validMoves;
 }
+
 uint64_t Chessboard::pawn_moves(Square square, Color color){
     uint64_t validMoves = 0;
+    int row = (color == WHITE ? 1 : -1) + square.row;
+    if (move_here({row,square.col}, color))
+        validMoves |= 1 << (8*row + square.col);
+    if (take_here({row, square.col+1}, color))
+        validMoves |= 1 << (8*row + square.col+1);
+    if (take_here({row, square.col-1}, color))
+        validMoves |= 1 << (8*row + square.col-1);
     return validMoves;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
